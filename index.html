@@ -147,15 +147,15 @@
 var phases = {
   '入料分段': { disabled:true },
   '打頭':     { disabled:true },
-  '戳牙':     { disabled:false, items:['牙板壓力測試','波形偵測'] },
+  '搓牙':     { disabled:false, items:['牙板壓力測試','波形偵測'] },
   '品管':     { disabled:false, items:['偵測出品質異常螺絲'] },
   '機台資料': { disabled:true }
 };
-var order = ['入料分段','打頭','戳牙','品管','機台資料'];
+var order = ['入料分段','打頭','搓牙','品管','機台資料'];
 var step1Items = ['現場機台警示燈','系統介面顯示','現場機台停機'];
 var step2Items = ['快速發現異常警示','可排除錯誤','機台警示與系統介面顯示恢復正常值'];
 
-var selectedPhase = '戳牙';
+var selectedPhase = '搓牙';
 var selectedItem = '牙板壓力測試';
 var checkState = {}; // key: "phase|item" -> { step1:[bool,...], step2:[bool,...] }
 
@@ -206,7 +206,7 @@ function handleClear(){
   document.getElementById('companyName').value = '';
   document.getElementById('siteContact').value = '';
   checkState = {};
-  selectedPhase = '戳牙';
+  selectedPhase = '搓牙';
   selectedItem = '牙板壓力測試';
   render();
 }
