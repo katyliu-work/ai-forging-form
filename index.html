@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>AI 鍛力系統導入檢核表</title>
+<title>導入檢核</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+TC:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -26,7 +26,6 @@
     background:#DEE0E3;
     display:flex; justify-content:center; padding:32px 16px;
   }
-  /* DESIGN: 結構 C（左右分區）＋ 風格 4（精確灰藍配色 ＋ 工業安全質感：分層陰影／統一大圓角／輕觸回饋） */
   .frame{
     width:100%; max-width:1100px; min-height:600px;
     background:var(--bg-page);
@@ -37,7 +36,6 @@
   .header{ font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
   .subheader{ font-size:13px; color:var(--text-muted); margin-bottom:18px; }
 
-  /* 表單欄位：公司名稱／廠區聯絡人 */
   .form-row{ display:flex; gap:16px; margin-bottom:22px; }
   .form-field{ flex:1; }
   .form-label{ font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; display:block; }
@@ -48,7 +46,8 @@
   }
   .form-input:focus{ outline:none; border-color:var(--accent); }
 
-  .action-row{ display:flex; gap:12px; margin-top:20px; justify-content:flex-end; }
+  .action-row{ display:flex; gap:12px; margin-top:20px; justify-content:flex-end; align-items:center; }
+  .submit-status{ font-size:13px; color:var(--text-muted); margin-right:auto; }
   .submit-btn{
     height:48px; padding:0 32px; border-radius:12px;
     background:var(--accent); color:#FFFFFF; font-size:15px; font-weight:700;
@@ -57,6 +56,7 @@
     transition:opacity 0.15s;
   }
   .submit-btn:active{ opacity:0.8; }
+  .submit-btn:disabled{ opacity:0.5; cursor:default; }
 
   .clear-btn{
     height:48px; padding:0 28px; border-radius:12px;
@@ -110,7 +110,8 @@
     body{ padding:16px 10px; }
     .frame{ padding:18px 14px; border-radius:16px; }
     .header{ font-size:18px; }
-    .action-row{ flex-direction:column-reverse; }
+    .action-row{ flex-direction:column-reverse; align-items:stretch; }
+    .submit-status{ margin-right:0; margin-bottom:8px; text-align:center; }
     .submit-btn, .clear-btn{ width:100%; }
   }
 </style>
@@ -137,12 +138,19 @@
   </div>
 
   <div class="action-row">
+    <span class="submit-status" id="submitStatus"></span>
     <button class="clear-btn" onclick="handleClear()">清除</button>
-    <button class="submit-btn" onclick="handleSubmit()">送出</button>
+    <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">送出</button>
   </div>
 </div>
 
 <script>
+/* ============================================================
+   ▼ Google Sheet 串接設定
+   把下面這個網址換成你部署 Apps Script Web App 後拿到的網址
+   ============================================================ */
+var SCRIPT_URL = 'https://script.google.com/macros/s/請貼上你的部署ID/exec';
+
 /* DESIGN: 測試階段（tier 1） -> 測試項目（tier 2） -> step1/step2 勾選項（tier 3） */
 var phases = {
   '入料分段': { disabled:true },
@@ -192,19 +200,69 @@ function toggleCheck(stepKey, idx){
   renderDetail();
 }
 
-function handleSubmit(){
+/* ============================================================
+   ▼ 把巢狀的 checkState 攤平成扁平物件，key 用「階段｜項目｜step｜文字」
+   之後在 phases 裡新增測試階段/項目，這裡完全不用改，
+   因為是用 order + phases 動態走訪，會自動包含新的項目。
+   ============================================================ */
+function flattenCheckState(){
+  var flat = {};
+  order.forEach(function(phase){
+    var p = phases[phase];
+    if (p.disabled || !p.items) return;
+    p.items.forEach(function(item){
+      var state = getState(phase, item);
+      step1Items.forEach(function(text, i){
+        var key = phase + '｜' + item + '｜step1｜' + text;
+        flat[key] = state.step1[i] ? 'V' : '';
+      });
+      step2Items.forEach(function(text, i){
+        var key = phase + '｜' + item + '｜step2｜' + text;
+        flat[key] = state.step2[i] ? 'V' : '';
+      });
+    });
+  });
+  return flat;
+}
+
+async function handleSubmit(){
   var company = document.getElementById('companyName').value.trim();
   var contact = document.getElementById('siteContact').value.trim();
   if (!company || !contact){
     alert('請填寫公司名稱與廠區聯絡人');
     return;
   }
-  alert('已送出檢核資料（公司名稱：' + company + '／聯絡人：' + contact + '）');
+
+  var payload = Object.assign(
+    { '公司名稱': company, '廠區聯絡人': contact },
+    flattenCheckState()
+  );
+
+  var btn = document.getElementById('submitBtn');
+  var status = document.getElementById('submitStatus');
+  btn.disabled = true;
+  status.textContent = '送出中…';
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Apps Script Web App 搭配 no-cors，無法讀取回應內容，但資料仍會送達
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    status.textContent = '已送出（' + new Date().toLocaleTimeString('zh-TW') + '）';
+  } catch (err){
+    console.error(err);
+    status.textContent = '送出失敗，請檢查網路連線';
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 function handleClear(){
   document.getElementById('companyName').value = '';
   document.getElementById('siteContact').value = '';
+  document.getElementById('submitStatus').textContent = '';
   checkState = {};
   selectedPhase = '搓牙';
   selectedItem = '牙板壓力測試';
