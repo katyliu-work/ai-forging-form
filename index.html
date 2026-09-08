@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>導入檢核</title>
+<title>欣錦 AI 鍛力系統導入檢核表</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+TC:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -33,8 +33,7 @@
     padding:28px 32px; box-sizing:border-box;
     display:flex; flex-direction:column;
   }
-  .header{ font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
-  .subheader{ font-size:13px; color:var(--text-muted); margin-bottom:18px; }
+  .header{ font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:18px; }
 
   .form-row{ display:flex; gap:16px; margin-bottom:22px; }
   .form-field{ flex:1; }
@@ -45,6 +44,7 @@
     font-family:inherit; box-sizing:border-box;
   }
   .form-input:focus{ outline:none; border-color:var(--accent); }
+  select.form-input{ cursor:pointer; appearance:auto; }
 
   .action-row{ display:flex; gap:12px; margin-top:20px; justify-content:flex-end; align-items:center; }
   .submit-status{ font-size:13px; color:var(--text-muted); margin-right:auto; }
@@ -66,16 +66,6 @@
   }
   .clear-btn:active{ opacity:0.7; }
 
-  .c-wrap{ display:flex; gap:14px; flex:1; }
-  .c-nav{ width:170px; display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
-  .c-nav-item{ display:flex; align-items:center; gap:9px; padding:12px 11px; border-radius:12px; font-size:14px; color:var(--text-secondary); cursor:pointer; user-select:none; }
-  .c-nav-item.active{ background:var(--surface-card-alt); color:var(--accent); font-weight:700; }
-  .c-nav-item.disabled{ opacity:0.4; cursor:default; }
-  .c-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-  .c-dot.ok{ background:var(--status-ok); }
-  .c-dot.warn{ background:var(--status-warn); }
-  .c-dot.danger{ background:var(--status-danger); }
-
   .c-detail{
     flex:1; background:var(--surface-card); border-radius:12px; padding:16px 18px;
     box-shadow:0 2px 4px rgba(22,24,29,0.14), 0 4px 10px rgba(22,24,29,0.08);
@@ -86,7 +76,7 @@
   .item-tab{ padding:7px 15px; border-radius:12px; background:var(--header-bg); font-size:13px; color:var(--text-secondary); cursor:pointer; user-select:none; }
   .item-tab.active{ background:var(--accent); color:#FFFFFF; font-weight:600; }
 
-  .b-step-label{ font-size:14px; font-weight:600; color:var(--text-primary); margin:12px 0 6px; }
+  .b-step-label{ font-size:14px; font-weight:600; color:var(--text-primary); margin:12px 0 6px; min-height:1px; }
   .b-step-group{ margin-bottom:10px; padding-left:10px; border-left:2px solid var(--border); }
   .b-step-title{ font-size:12px; color:var(--text-muted); margin-bottom:6px; }
 
@@ -102,8 +92,6 @@
     .frame{ padding:22px 20px; }
   }
   @media (max-width:720px){
-    .c-wrap{ flex-direction:column; }
-    .c-nav{ width:100%; flex-direction:row; flex-wrap:wrap; }
     .form-row{ flex-direction:column; gap:14px; }
   }
   @media (max-width:480px){
@@ -118,24 +106,39 @@
 </head>
 <body>
 <div class="frame">
-  <div class="header">導入檢核</div>
-  <div class="subheader">選擇測試階段</div>
+  <div class="header">欣錦 AI 鍛力系統導入檢核表</div>
 
   <div class="form-row">
-    <div class="form-field">
-      <label class="form-label" for="companyName">公司名稱</label>
-      <input class="form-input" type="text" id="companyName" placeholder="請輸入公司名稱">
-    </div>
     <div class="form-field">
       <label class="form-label" for="siteContact">廠區聯絡人</label>
       <input class="form-input" type="text" id="siteContact" placeholder="請輸入廠區聯絡人姓名">
     </div>
+    <div class="form-field">
+      <label class="form-label" for="companyName">公司/工廠名稱</label>
+      <input class="form-input" type="text" id="companyName" placeholder="請輸入公司/工廠名稱">
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="checkerName">檢核表填寫人</label>
+      <input class="form-input" type="text" id="checkerName" placeholder="請輸入填寫人姓名">
+    </div>
   </div>
 
-  <div class="c-wrap">
-    <div class="c-nav" id="nav"></div>
-    <div class="c-detail" id="detail"></div>
+  <div class="form-row">
+    <div class="form-field">
+      <label class="form-label" for="machineName">機台型號</label>
+      <input class="form-input" type="text" id="machineName" placeholder="請輸入機台型號">
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="systemModel">系統型號</label>
+      <input class="form-input" type="text" id="systemModel" placeholder="請輸入系統型號">
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="useTarget">使用目標</label>
+      <select class="form-input" id="useTarget" onchange="selectPhase(this.value)"></select>
+    </div>
   </div>
+
+  <div class="c-detail" id="detail"></div>
 
   <div class="action-row">
     <span class="submit-status" id="submitStatus"></span>
@@ -147,35 +150,42 @@
 <script>
 /* ============================================================
    ▼ Google Sheet 串接設定
-   把下面這個網址換成你部署 Apps Script Web App 後拿到的網址
    ============================================================ */
 var SCRIPT_URL = 'https://script.google.com/macros/s/請貼上你的部署ID/exec';
 
-/* DESIGN: 測試階段（tier 1） -> 測試項目（tier 2） -> step1/step2 勾選項（tier 3） */
+/* DESIGN: 使用目標（tier 1） -> 測試項目（tier 2） -> step1/step2 勾選項（tier 3）
+   入料分段／打頭：先保留項目層級的資料結構，但項目名稱留空（不顯示），
+   只顯示 step1/step2 與勾選項，用跟搓牙/品管共用的同一組文字。 */
 var phases = {
-  '入料分段': { disabled:true },
-  '打頭':     { disabled:true },
-  '搓牙':     { disabled:false, items:['牙板壓力測試','波形偵測'] },
-  '品管':     { disabled:false, items:['偵測出品質異常螺絲'] },
-  '機台資料': { disabled:true }
+  '入料分段': { items:[''] },
+  '打頭':     { items:[''] },
+  '搓牙':     { items:['牙板壓力測試','波形偵測'] },
+  '品管':     { items:['螺絲品質偵測'] }
 };
-var order = ['入料分段','打頭','搓牙','品管','機台資料'];
+var order = ['入料分段','打頭','搓牙','品管'];
 var step1Items = ['現場機台警示燈','系統介面顯示','現場機台停機'];
 var step2Items = ['快速發現異常警示','可排除錯誤','機台警示與系統介面顯示恢復正常值'];
 
 var selectedPhase = '搓牙';
 var selectedItem = '牙板壓力測試';
-var checkState = {}; // key: "phase|item" -> { step1:[bool,...], step2:[bool,...] }
+var checkState = {}; // key: "phase|item" -> { step1:[bool,...], step2:[bool,...], updatedAt: Date|null }
 
 function getState(phase, item){
   var key = phase + '|' + item;
   if (!checkState[key]){
     checkState[key] = {
       step1: step1Items.map(function(){ return false; }),
-      step2: step2Items.map(function(){ return false; })
+      step2: step2Items.map(function(){ return false; }),
+      updatedAt: null
     };
   }
   return checkState[key];
+}
+
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+
+function formatDateTime(d){
+  return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
 }
 
 function checklistHtml(phase, item){
@@ -197,19 +207,15 @@ function checklistHtml(phase, item){
 function toggleCheck(stepKey, idx){
   var state = getState(selectedPhase, selectedItem);
   state[stepKey][idx] = !state[stepKey][idx];
+  state.updatedAt = new Date(); // 記錄真實填入時間
   renderDetail();
 }
 
-/* ============================================================
-   ▼ 把巢狀的 checkState 攤平成扁平物件，key 用「階段｜項目｜step｜文字」
-   之後在 phases 裡新增測試階段/項目，這裡完全不用改，
-   因為是用 order + phases 動態走訪，會自動包含新的項目。
-   ============================================================ */
 function flattenCheckState(){
   var flat = {};
   order.forEach(function(phase){
     var p = phases[phase];
-    if (p.disabled || !p.items) return;
+    if (!p || !p.items) return;
     p.items.forEach(function(item){
       var state = getState(phase, item);
       step1Items.forEach(function(text, i){
@@ -228,13 +234,23 @@ function flattenCheckState(){
 async function handleSubmit(){
   var company = document.getElementById('companyName').value.trim();
   var contact = document.getElementById('siteContact').value.trim();
+  var machine = document.getElementById('machineName').value.trim();
+  var model = document.getElementById('systemModel').value.trim();
+  var checker = document.getElementById('checkerName').value.trim();
   if (!company || !contact){
     alert('請填寫公司名稱與廠區聯絡人');
     return;
   }
 
   var payload = Object.assign(
-    { '公司名稱': company, '廠區聯絡人': contact },
+    {
+      '廠區聯絡人': contact,
+      '公司/工廠名稱': company,
+      '檢核表填寫人': checker,
+      '機台型號': machine,
+      '系統型號': model,
+      '使用目標': selectedPhase
+    },
     flattenCheckState()
   );
 
@@ -246,7 +262,7 @@ async function handleSubmit(){
   try {
     await fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors', // Apps Script Web App 搭配 no-cors，無法讀取回應內容，但資料仍會送達
+      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
@@ -262,6 +278,9 @@ async function handleSubmit(){
 function handleClear(){
   document.getElementById('companyName').value = '';
   document.getElementById('siteContact').value = '';
+  document.getElementById('machineName').value = '';
+  document.getElementById('systemModel').value = '';
+  document.getElementById('checkerName').value = '';
   document.getElementById('submitStatus').textContent = '';
   checkState = {};
   selectedPhase = '搓牙';
@@ -270,7 +289,6 @@ function handleClear(){
 }
 
 function selectPhase(name){
-  if (phases[name].disabled) return;
   selectedPhase = name;
   var items = phases[name].items;
   selectedItem = items[0];
@@ -282,19 +300,16 @@ function selectItem(name){
   render();
 }
 
-function renderNav(){
-  var h = '';
-  order.forEach(function(name){
-    var p = phases[name];
-    var dotClass = p.disabled ? 'ok' : 'warn';
-    var cls = p.disabled ? 'disabled' : (name === selectedPhase ? 'active' : '');
-    h += '<div class="c-nav-item ' + cls + '" onclick="selectPhase(\'' + name + '\')"><span class="c-dot ' + dotClass + '"></span>' + name + '</div>';
-  });
-  document.getElementById('nav').innerHTML = h;
+function renderUseTargetOptions(){
+  var sel = document.getElementById('useTarget');
+  sel.innerHTML = order.map(function(name){
+    return '<option value="' + name + '">' + name + '</option>';
+  }).join('');
 }
 
 function renderDetail(){
   var p = phases[selectedPhase];
+  var state = getState(selectedPhase, selectedItem);
   var h = '<div class="c-detail-title">' + selectedPhase + '・測試項目</div>';
   if (p.items.length > 1){
     h += '<div class="item-tabs">';
@@ -305,14 +320,16 @@ function renderDetail(){
   }
   h += '<div class="b-step-label">' + selectedItem + '</div>';
   h += checklistHtml(selectedPhase, selectedItem);
-  h += '<div class="c-log">最後更新 14:30・王工程師</div>';
+  h += '<div class="c-log">更新時間・' + (state.updatedAt ? formatDateTime(state.updatedAt) : '尚未填寫') + '</div>';
   document.getElementById('detail').innerHTML = h;
 }
 
 function render(){
-  renderNav();
+  document.getElementById('useTarget').value = selectedPhase;
   renderDetail();
 }
+
+renderUseTargetOptions();
 render();
 </script>
 </body>
