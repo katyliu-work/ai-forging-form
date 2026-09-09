@@ -18,7 +18,7 @@
     --border:#DCDFE3;
     --status-ok:#D6DCE1;
     --status-warn:#8AA6BE;
-    --status-danger:#2E5C8A;
+    --status-error:#C0392B;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
@@ -26,6 +26,8 @@
     background:#DEE0E3;
     display:flex; justify-content:center; padding:32px 16px;
   }
+
+  /* ==================== 版面框架 ==================== */
   .frame{
     width:100%; max-width:1100px; min-height:600px;
     background:var(--bg-page);
@@ -35,6 +37,7 @@
   }
   .header{ font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:18px; }
 
+  /* ==================== 表單欄位 ==================== */
   .form-row{ display:flex; gap:16px; margin-bottom:22px; }
   .form-field{ flex:1; }
   .form-label{ font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; display:block; }
@@ -45,7 +48,38 @@
   }
   .form-input:focus{ outline:none; border-color:var(--accent); }
   select.form-input{ cursor:pointer; appearance:auto; }
+  .form-input.error{ border-color:var(--status-error); }
+  .field-error{ display:none; font-size:12px; color:var(--status-error); margin-top:4px; }
+  .field-error.visible{ display:block; }
 
+  /* ==================== 送出失敗彈窗 ==================== */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(22,24,29,0.45);
+    display:none; align-items:center; justify-content:center; z-index:1000; padding:20px;
+  }
+  .modal-overlay.visible{ display:flex; }
+  .modal-card{
+    position:relative; background:#FFFFFF; border-radius:16px; padding:28px 26px; max-width:340px; width:100%;
+    text-align:center; box-shadow:0 8px 24px rgba(22,24,29,0.25);
+  }
+  .modal-close{
+    position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%;
+    border:none; background:transparent; color:var(--text-secondary); font-size:16px;
+    line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-family:inherit; transition:background 0.15s;
+  }
+  .modal-close:hover{ background:var(--header-bg); }
+  .modal-icon{
+    width:52px; height:52px; border-radius:50%; background:var(--status-error); color:#FFFFFF;
+    font-size:24px; font-weight:700; display:flex; align-items:center; justify-content:center;
+    margin:0 auto 14px;
+  }
+  .modal-title{ font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:8px; }
+  .modal-message{ font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:22px; }
+  .modal-actions{ display:flex; gap:10px; }
+  .modal-actions .clear-btn, .modal-actions .submit-btn{ flex:1; height:44px; padding:0; }
+
+  /* ==================== 按鈕 / 動作列 ==================== */
   .action-row{ display:flex; gap:12px; margin-top:20px; justify-content:flex-end; align-items:center; }
   .submit-status{ font-size:13px; color:var(--text-muted); margin-right:auto; }
   .submit-btn{
@@ -57,7 +91,6 @@
   }
   .submit-btn:active{ opacity:0.8; }
   .submit-btn:disabled{ opacity:0.5; cursor:default; }
-
   .clear-btn{
     height:48px; padding:0 28px; border-radius:12px;
     background:transparent; color:var(--accent); font-size:15px; font-weight:700;
@@ -66,28 +99,41 @@
   }
   .clear-btn:active{ opacity:0.7; }
 
+  /* ==================== 測試項目卡片 ==================== */
   .c-detail{
     flex:1; background:var(--surface-card); border-radius:12px; padding:16px 18px;
     box-shadow:0 2px 4px rgba(22,24,29,0.14), 0 4px 10px rgba(22,24,29,0.08);
   }
   .c-detail-title{ font-size:15px; font-weight:700; color:var(--accent); margin-bottom:10px; }
-
   .item-tabs{ display:flex; gap:7px; margin:6px 0 10px; }
   .item-tab{ padding:7px 15px; border-radius:12px; background:var(--header-bg); font-size:13px; color:var(--text-secondary); cursor:pointer; user-select:none; }
   .item-tab.active{ background:var(--accent); color:#FFFFFF; font-weight:600; }
-
   .b-step-label{ font-size:14px; font-weight:600; color:var(--text-primary); margin:12px 0 6px; min-height:1px; }
   .b-step-group{ margin-bottom:10px; padding-left:10px; border-left:2px solid var(--border); }
   .b-step-title{ font-size:12px; color:var(--text-muted); margin-bottom:6px; }
-
   .b-item{ display:flex; align-items:center; gap:10px; padding:8px 0; font-size:14px; color:var(--text-secondary); cursor:pointer; user-select:none; }
   .b-check{ width:19px; height:19px; border:1.5px solid #B9BEC4; border-radius:5px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:opacity 0.15s; }
   .b-check.done{ background:var(--accent); border-color:var(--accent); }
   .b-check.done::after{ content:'✓'; color:#FFFFFF; font-size:13px; font-weight:700; line-height:1; }
   .b-item:active .b-check{ opacity:0.7; }
-
   .c-log{ margin-top:12px; font-size:11px; color:var(--text-muted); }
 
+  /* ==================== 完成頁 ==================== */
+  .completion-view{
+    display:none; flex-direction:column; align-items:center; text-align:center;
+    gap:14px; padding:64px 20px; flex:1;
+  }
+  .completion-view.visible{ display:flex; }
+  .completion-icon{
+    width:60px; height:60px; border-radius:50%; background:var(--accent); color:#FFFFFF;
+    font-size:28px; font-weight:700; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 4px rgba(22,24,29,0.14), 0 4px 10px rgba(22,24,29,0.08);
+  }
+  .completion-title{ font-size:18px; font-weight:700; color:var(--text-primary); }
+  .completion-summary{ font-size:13px; color:var(--text-secondary); line-height:1.7; text-align:left; }
+  .completion-summary b{ color:var(--text-primary); font-weight:600; }
+
+  /* ==================== RWD ==================== */
   @media (max-width:900px){
     .frame{ padding:22px 20px; }
   }
@@ -105,57 +151,88 @@
 </style>
 </head>
 <body>
+
+<!-- 送出失敗彈窗 -->
+<div class="modal-overlay" id="errorModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeErrorModal()" aria-label="關閉">✕</button>
+    <div class="modal-icon">!</div>
+    <div class="modal-title">送出失敗</div>
+    <div class="modal-message" id="errorModalMessage"></div>
+    <div class="modal-actions">
+      <button class="clear-btn" onclick="closeErrorModal()">返回</button>
+      <button class="submit-btn" onclick="retrySubmit()">重新送出</button>
+    </div>
+  </div>
+</div>
+
 <div class="frame">
   <div class="header">欣錦 AI 鍛力系統導入檢核表</div>
 
-  <div class="form-row">
-    <div class="form-field">
-      <label class="form-label" for="siteContact">廠區聯絡人</label>
-      <input class="form-input" type="text" id="siteContact" placeholder="請輸入廠區聯絡人姓名">
+  <!-- 表單畫面 -->
+  <div id="formView">
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label" for="siteContact">廠區聯絡人</label>
+        <input class="form-input" type="text" id="siteContact" placeholder="請輸入廠區聯絡人姓名">
+        <div class="field-error" id="siteContactError"></div>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="companyName">公司/工廠名稱</label>
+        <input class="form-input" type="text" id="companyName" placeholder="請輸入公司/工廠名稱">
+        <div class="field-error" id="companyNameError"></div>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="checkerName">檢核表填寫人</label>
+        <input class="form-input" type="text" id="checkerName" placeholder="請輸入填寫人姓名">
+      </div>
     </div>
-    <div class="form-field">
-      <label class="form-label" for="companyName">公司/工廠名稱</label>
-      <input class="form-input" type="text" id="companyName" placeholder="請輸入公司/工廠名稱">
+
+    <div class="form-row">
+      <div class="form-field">
+        <label class="form-label" for="machineName">機台型號</label>
+        <input class="form-input" type="text" id="machineName" placeholder="請輸入機台型號">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="systemModel">系統型號</label>
+        <input class="form-input" type="text" id="systemModel" placeholder="請輸入系統型號">
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="useTarget">使用目標</label>
+        <select class="form-input" id="useTarget" onchange="selectPhase(this.value)"></select>
+      </div>
     </div>
-    <div class="form-field">
-      <label class="form-label" for="checkerName">檢核表填寫人</label>
-      <input class="form-input" type="text" id="checkerName" placeholder="請輸入填寫人姓名">
+
+    <div class="c-detail" id="detail"></div>
+
+    <div class="action-row">
+      <span class="submit-status" id="submitStatus"></span>
+      <button class="clear-btn" onclick="handleClear()">清除</button>
+      <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">送出</button>
     </div>
   </div>
 
-  <div class="form-row">
-    <div class="form-field">
-      <label class="form-label" for="machineName">機台型號</label>
-      <input class="form-input" type="text" id="machineName" placeholder="請輸入機台型號">
-    </div>
-    <div class="form-field">
-      <label class="form-label" for="systemModel">系統型號</label>
-      <input class="form-input" type="text" id="systemModel" placeholder="請輸入系統型號">
-    </div>
-    <div class="form-field">
-      <label class="form-label" for="useTarget">使用目標</label>
-      <select class="form-input" id="useTarget" onchange="selectPhase(this.value)"></select>
-    </div>
-  </div>
-
-  <div class="c-detail" id="detail"></div>
-
-  <div class="action-row">
-    <span class="submit-status" id="submitStatus"></span>
-    <button class="clear-btn" onclick="handleClear()">清除</button>
-    <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">送出</button>
+  <!-- 送出完成頁 -->
+  <div id="completionView" class="completion-view">
+    <div class="completion-icon">✓</div>
+    <div class="completion-title">檢核表已送出</div>
+    <div class="completion-summary" id="completionSummary"></div>
+    <button class="submit-btn" onclick="startNextChecklist()">開啟下一張檢核表</button>
   </div>
 </div>
 
 <script>
 /* ============================================================
-   ▼ Google Sheet 串接設定
-   ============================================================ */
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwel6zm0xASWoMV-kY8tD5kCT7lIhna7-5bNYkwX5wtcROuDqQ9sq0suNrZ9s2b9Bsbvw/exec';
+ * 設定：Google Sheet 串接網址
+ * ============================================================ */
+var SCRIPT_URL = 'https://script.google.com/macros/s/請貼上你的部署ID/exec';
 
-/* DESIGN: 使用目標（tier 1） -> 測試項目（tier 2） -> step1/step2 勾選項（tier 3）
-   入料分段／打頭：先保留項目層級的資料結構，但項目名稱留空（不顯示），
-   只顯示 step1/step2 與勾選項，用跟搓牙/品管共用的同一組文字。 */
+/* ============================================================
+ * 資料模型
+ * 使用目標（tier1）-> 測試項目（tier2）-> step1/step2 勾選項（tier3）
+ * 入料分段／打頭：保留項目層級的資料結構，但項目名稱留空（不顯示），
+ * 只顯示 step1/step2 與勾選項，使用跟搓牙/品管共用的同一組文字。
+ * ============================================================ */
 var phases = {
   '入料分段': { items:[''] },
   '打頭':     { items:[''] },
@@ -182,10 +259,30 @@ function getState(phase, item){
   return checkState[key];
 }
 
-function pad(n){ return n < 10 ? '0' + n : '' + n; }
+/* ============================================================
+ * 小工具
+ * ============================================================ */
+function val(id){
+  return document.getElementById(id).value.trim();
+}
+
+function pad(n){
+  return n < 10 ? '0' + n : '' + n;
+}
 
 function formatDateTime(d){
-  return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) +
+    ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+/* ============================================================
+ * 畫面渲染
+ * ============================================================ */
+function renderUseTargetOptions(){
+  var sel = document.getElementById('useTarget');
+  sel.innerHTML = order.map(function(name){
+    return '<option value="' + name + '">' + name + '</option>';
+  }).join('');
 }
 
 function checklistHtml(phase, item){
@@ -202,109 +299,6 @@ function checklistHtml(phase, item){
   });
   h += '</div>';
   return h;
-}
-
-function toggleCheck(stepKey, idx){
-  var state = getState(selectedPhase, selectedItem);
-  state[stepKey][idx] = !state[stepKey][idx];
-  state.updatedAt = new Date(); // 記錄真實填入時間
-  renderDetail();
-}
-
-function flattenCheckState(){
-  var flat = {};
-  order.forEach(function(phase){
-    var p = phases[phase];
-    if (!p || !p.items) return;
-    p.items.forEach(function(item){
-      var state = getState(phase, item);
-      step1Items.forEach(function(text, i){
-        var key = phase + '｜' + item + '｜step1｜' + text;
-        flat[key] = state.step1[i] ? 'V' : '';
-      });
-      step2Items.forEach(function(text, i){
-        var key = phase + '｜' + item + '｜step2｜' + text;
-        flat[key] = state.step2[i] ? 'V' : '';
-      });
-    });
-  });
-  return flat;
-}
-
-async function handleSubmit(){
-  var company = document.getElementById('companyName').value.trim();
-  var contact = document.getElementById('siteContact').value.trim();
-  var machine = document.getElementById('machineName').value.trim();
-  var model = document.getElementById('systemModel').value.trim();
-  var checker = document.getElementById('checkerName').value.trim();
-  if (!company || !contact){
-    alert('請填寫公司名稱與廠區聯絡人');
-    return;
-  }
-
-  var payload = Object.assign(
-    {
-      '廠區聯絡人': contact,
-      '公司/工廠名稱': company,
-      '檢核表填寫人': checker,
-      '機台型號': machine,
-      '系統型號': model,
-      '使用目標': selectedPhase
-    },
-    flattenCheckState()
-  );
-
-  var btn = document.getElementById('submitBtn');
-  var status = document.getElementById('submitStatus');
-  btn.disabled = true;
-  status.textContent = '送出中…';
-
-  try {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
-    });
-    status.textContent = '已送出（' + new Date().toLocaleTimeString('zh-TW') + '）';
-  } catch (err){
-    console.error(err);
-    status.textContent = '送出失敗，請檢查網路連線';
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-function handleClear(){
-  document.getElementById('companyName').value = '';
-  document.getElementById('siteContact').value = '';
-  document.getElementById('machineName').value = '';
-  document.getElementById('systemModel').value = '';
-  document.getElementById('checkerName').value = '';
-  document.getElementById('submitStatus').textContent = '';
-  checkState = {};
-  selectedPhase = '搓牙';
-  selectedItem = '牙板壓力測試';
-  render();
-}
-
-function selectPhase(name){
-  selectedPhase = name;
-  var items = phases[name].items;
-  selectedItem = items[0];
-  render();
-}
-
-function selectItem(name){
-  selectedItem = name;
-  render();
-}
-
-function renderUseTargetOptions(){
-  var sel = document.getElementById('useTarget');
-  sel.innerHTML = order.map(function(name){
-    return '<option value="' + name + '">' + name + '</option>';
-  }).join('');
 }
 
 function renderDetail(){
@@ -329,6 +323,193 @@ function render(){
   renderDetail();
 }
 
+/* ============================================================
+ * 使用者互動：切換測試階段／項目／勾選
+ * ============================================================ */
+function selectPhase(name){
+  selectedPhase = name;
+  selectedItem = phases[name].items[0];
+  render();
+}
+
+function selectItem(name){
+  selectedItem = name;
+  render();
+}
+
+function toggleCheck(stepKey, idx){
+  var state = getState(selectedPhase, selectedItem);
+  state[stepKey][idx] = !state[stepKey][idx];
+  state.updatedAt = new Date(); // 記錄真實填入時間
+  renderDetail();
+}
+
+/* ============================================================
+ * 表單驗證
+ * ============================================================ */
+function setFieldError(inputId, errorId, message){
+  document.getElementById(inputId).classList.add('error');
+  var errEl = document.getElementById(errorId);
+  errEl.textContent = message;
+  errEl.classList.add('visible');
+}
+
+function clearFieldError(inputId, errorId){
+  document.getElementById(inputId).classList.remove('error');
+  var errEl = document.getElementById(errorId);
+  errEl.textContent = '';
+  errEl.classList.remove('visible');
+}
+
+function validateRequiredFields(contact, company){
+  clearFieldError('siteContact', 'siteContactError');
+  clearFieldError('companyName', 'companyNameError');
+
+  var isValid = true;
+  if (!contact){
+    setFieldError('siteContact', 'siteContactError', '請填寫廠區聯絡人');
+    isValid = false;
+  }
+  if (!company){
+    setFieldError('companyName', 'companyNameError', '請填寫公司/工廠名稱');
+    isValid = false;
+  }
+  return isValid;
+}
+
+/* ============================================================
+ * 送出失敗彈窗
+ * ============================================================ */
+function showErrorModal(message){
+  document.getElementById('errorModalMessage').textContent = message;
+  document.getElementById('errorModal').classList.add('visible');
+}
+
+function closeErrorModal(){
+  document.getElementById('errorModal').classList.remove('visible');
+}
+
+function retrySubmit(){
+  closeErrorModal();
+  handleSubmit();
+}
+
+/* ============================================================
+ * 送出資料組裝：每個「使用目標 × 測試項目」各自一筆記錄，
+ * 勾選欄位直接用共用的 step1Items / step2Items 文字當 key。
+ * ============================================================ */
+function buildRecords(){
+  var records = [];
+  order.forEach(function(phase){
+    var p = phases[phase];
+    if (!p || !p.items) return;
+    p.items.forEach(function(item){
+      var state = getState(phase, item);
+      var rec = { '使用目標': phase, '測試項目': item || '' };
+      step1Items.forEach(function(text, i){ rec[text] = state.step1[i] ? 'V' : ''; });
+      step2Items.forEach(function(text, i){ rec[text] = state.step2[i] ? 'V' : ''; });
+      records.push(rec);
+    });
+  });
+  return records;
+}
+
+/* ============================================================
+ * 送出流程
+ * ============================================================ */
+async function handleSubmit(){
+  var contact = val('siteContact');
+  var company = val('companyName');
+  var checker = val('checkerName');
+  var machine = val('machineName');
+  var model = val('systemModel');
+
+  if (!validateRequiredFields(contact, company)) return;
+
+  var payload = {
+    basicInfo: {
+      '廠區聯絡人': contact,
+      '公司/工廠名稱': company,
+      '檢核表填寫人': checker,
+      '機台型號': machine,
+      '系統型號': model
+    },
+    records: buildRecords()
+  };
+
+  var btn = document.getElementById('submitBtn');
+  var status = document.getElementById('submitStatus');
+  btn.disabled = true;
+  status.textContent = '送出中…';
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Apps Script 特性：無法讀取實際回應內容或狀態碼
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    status.textContent = '';
+    showCompletion({
+      company: company,
+      checker: checker,
+      machine: machine,
+      model: model,
+      target: selectedPhase,
+      time: new Date().toLocaleString('zh-TW')
+    });
+  } catch (err){
+    // no-cors 模式下無法得知伺服器實際狀態，只有連線本身失敗時才會進到這裡，
+    // 因此訊息刻意保持中性，不假定是網路問題或其他特定原因。
+    console.error(err);
+    status.textContent = '';
+    showErrorModal('目前無法送出資料，請稍後再試一次。');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ============================================================
+ * 完成頁
+ * ============================================================ */
+function showCompletion(info){
+  var summary = document.getElementById('completionSummary');
+  summary.innerHTML =
+    '公司/工廠名稱：<b>' + info.company + '</b><br>' +
+    '檢核表填寫人：<b>' + info.checker + '</b><br>' +
+    '機台型號：<b>' + info.machine + '</b><br>' +
+    '系統型號：<b>' + info.model + '</b><br>' +
+    '使用目標：<b>' + info.target + '</b><br>' +
+    '送出時間：<b>' + info.time + '</b>';
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('completionView').classList.add('visible');
+}
+
+function startNextChecklist(){
+  handleClear();
+  document.getElementById('completionView').classList.remove('visible');
+  document.getElementById('formView').style.display = '';
+}
+
+/* ============================================================
+ * 清除 / 重置
+ * ============================================================ */
+function handleClear(){
+  ['companyName','siteContact','machineName','systemModel','checkerName'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('submitStatus').textContent = '';
+  clearFieldError('siteContact', 'siteContactError');
+  clearFieldError('companyName', 'companyNameError');
+  checkState = {};
+  selectedPhase = '搓牙';
+  selectedItem = '牙板壓力測試';
+  render();
+}
+
+/* ============================================================
+ * 初始化
+ * ============================================================ */
 renderUseTargetOptions();
 render();
 </script>
