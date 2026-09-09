@@ -416,23 +416,15 @@ function retrySubmit(){
 }
 
 /* ============================================================
- * 送出資料組裝：每個「使用目標 × 測試項目」各自一筆記錄，
+ * 送出資料組裝：只組出「目前選擇的使用目標 × 測試項目」這一筆，
  * 勾選欄位直接用共用的 step1Items / step2Items 文字當 key。
  * ============================================================ */
-function buildRecords(){
-  var records = [];
-  order.forEach(function(phase){
-    var p = phases[phase];
-    if (!p || !p.items) return;
-    p.items.forEach(function(item){
-      var state = getState(phase, item);
-      var rec = { '使用目標': phase, '測試項目': item || '' };
-      step1Items.forEach(function(text, i){ rec[text] = state.step1[i] ? 'V' : ''; });
-      step2Items.forEach(function(text, i){ rec[text] = state.step2[i] ? 'V' : ''; });
-      records.push(rec);
-    });
-  });
-  return records;
+function buildRecord(){
+  var state = getState(selectedPhase, selectedItem);
+  var rec = { '使用目標': selectedPhase, '測試項目': selectedItem || '' };
+  step1Items.forEach(function(text, i){ rec[text] = state.step1[i] ? 'V' : ''; });
+  step2Items.forEach(function(text, i){ rec[text] = state.step2[i] ? 'V' : ''; });
+  return rec;
 }
 
 /* ============================================================
@@ -455,7 +447,7 @@ async function handleSubmit(){
       '機台型號': machine,
       '系統型號': model
     },
-    records: buildRecords()
+    records: [buildRecord()]
   };
 
   var btn = document.getElementById('submitBtn');
