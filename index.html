@@ -101,7 +101,7 @@
 
   /* ==================== 測試項目卡片 ==================== */
   .c-detail{
-    flex:1; background:var(--surface-card); border-radius:12px; padding:16px 18px;
+    flex:1; min-height:460px; background:var(--surface-card); border-radius:12px; padding:16px 18px;
     box-shadow:0 2px 4px rgba(22,24,29,0.14), 0 4px 10px rgba(22,24,29,0.08);
   }
   .c-detail-title{ font-size:15px; font-weight:700; color:var(--accent); margin-bottom:10px; }
@@ -185,6 +185,7 @@
       <div class="form-field">
         <label class="form-label" for="checkerName">檢核表填寫人</label>
         <input class="form-input" type="text" id="checkerName" placeholder="請輸入填寫人姓名">
+        <div class="field-error" id="checkerNameError"></div>
       </div>
     </div>
 
@@ -192,14 +193,17 @@
       <div class="form-field">
         <label class="form-label" for="machineName">機台型號</label>
         <input class="form-input" type="text" id="machineName" placeholder="請輸入機台型號">
+        <div class="field-error" id="machineNameError"></div>
       </div>
       <div class="form-field">
         <label class="form-label" for="systemModel">系統型號</label>
         <input class="form-input" type="text" id="systemModel" placeholder="請輸入系統型號">
+        <div class="field-error" id="systemModelError"></div>
       </div>
       <div class="form-field">
         <label class="form-label" for="useTarget">使用目標</label>
         <select class="form-input" id="useTarget" onchange="selectPhase(this.value)"></select>
+        <div class="field-error" id="useTargetError"></div>
       </div>
     </div>
 
@@ -243,8 +247,18 @@ var order = ['入料分段','打頭','搓牙','品管'];
 var step1Items = ['現場機台警示燈','系統介面顯示','現場機台停機'];
 var step2Items = ['快速發現異常警示','可排除錯誤','機台警示與系統介面顯示恢復正常值'];
 
-var selectedPhase = '搓牙';
-var selectedItem = '牙板壓力測試';
+/* 必填欄位設定：id、對應的錯誤訊息容器 id、錯誤訊息文字 */
+var REQUIRED_FIELDS = [
+  { id:'siteContact',  errorId:'siteContactError',  message:'請填寫廠區聯絡人' },
+  { id:'companyName',  errorId:'companyNameError',  message:'請填寫公司/工廠名稱' },
+  { id:'checkerName',  errorId:'checkerNameError',  message:'請填寫檢核表填寫人' },
+  { id:'machineName',  errorId:'machineNameError',  message:'請填寫機台型號' },
+  { id:'systemModel',  errorId:'systemModelError',  message:'請填寫系統型號' },
+  { id:'useTarget',    errorId:'useTargetError',    message:'請選擇使用目標' }
+];
+
+var selectedPhase = null;
+var selectedItem = null;
 var checkState = {}; // key: "phase|item" -> { step1:[bool,...], step2:[bool,...], updatedAt: Date|null }
 
 function getState(phase, item){
@@ -280,9 +294,11 @@ function formatDateTime(d){
  * ============================================================ */
 function renderUseTargetOptions(){
   var sel = document.getElementById('useTarget');
-  sel.innerHTML = order.map(function(name){
+  var placeholder = '<option value="" disabled ' + (selectedPhase ? '' : 'selected') + '>請選擇</option>';
+  var options = order.map(function(name){
     return '<option value="' + name + '">' + name + '</option>';
   }).join('');
+  sel.innerHTML = placeholder + options;
 }
 
 function checklistHtml(phase, item){
@@ -302,6 +318,15 @@ function checklistHtml(phase, item){
 }
 
 function renderDetail(){
+  var detail = document.getElementById('detail');
+
+  if (!selectedPhase){
+    detail.innerHTML =
+      '<div class="c-detail-title">測試項目</div>' +
+      '<div class="b-step-title">請先選擇使用目標</div>';
+    return;
+  }
+
   var p = phases[selectedPhase];
   var state = getState(selectedPhase, selectedItem);
   var h = '<div class="c-detail-title">' + selectedPhase + '・測試項目</div>';
@@ -315,11 +340,11 @@ function renderDetail(){
   h += '<div class="b-step-label">' + selectedItem + '</div>';
   h += checklistHtml(selectedPhase, selectedItem);
   h += '<div class="c-log">更新時間・' + (state.updatedAt ? formatDateTime(state.updatedAt) : '尚未填寫') + '</div>';
-  document.getElementById('detail').innerHTML = h;
+  detail.innerHTML = h;
 }
 
 function render(){
-  document.getElementById('useTarget').value = selectedPhase;
+  document.getElementById('useTarget').value = selectedPhase || '';
   renderDetail();
 }
 
@@ -361,19 +386,15 @@ function clearFieldError(inputId, errorId){
   errEl.classList.remove('visible');
 }
 
-function validateRequiredFields(contact, company){
-  clearFieldError('siteContact', 'siteContactError');
-  clearFieldError('companyName', 'companyNameError');
-
+function validateRequiredFields(){
   var isValid = true;
-  if (!contact){
-    setFieldError('siteContact', 'siteContactError', '請填寫廠區聯絡人');
-    isValid = false;
-  }
-  if (!company){
-    setFieldError('companyName', 'companyNameError', '請填寫公司/工廠名稱');
-    isValid = false;
-  }
+  REQUIRED_FIELDS.forEach(function(field){
+    clearFieldError(field.id, field.errorId);
+    if (!val(field.id)){
+      setFieldError(field.id, field.errorId, field.message);
+      isValid = false;
+    }
+  });
   return isValid;
 }
 
@@ -424,7 +445,7 @@ async function handleSubmit(){
   var machine = val('machineName');
   var model = val('systemModel');
 
-  if (!validateRequiredFields(contact, company)) return;
+  if (!validateRequiredFields()) return;
 
   var payload = {
     basicInfo: {
@@ -499,11 +520,13 @@ function handleClear(){
     document.getElementById(id).value = '';
   });
   document.getElementById('submitStatus').textContent = '';
-  clearFieldError('siteContact', 'siteContactError');
-  clearFieldError('companyName', 'companyNameError');
+  REQUIRED_FIELDS.forEach(function(field){
+    clearFieldError(field.id, field.errorId);
+  });
   checkState = {};
-  selectedPhase = '搓牙';
-  selectedItem = '牙板壓力測試';
+  selectedPhase = null;
+  selectedItem = null;
+  renderUseTargetOptions();
   render();
 }
 
